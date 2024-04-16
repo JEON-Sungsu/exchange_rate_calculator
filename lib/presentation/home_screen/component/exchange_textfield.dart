@@ -21,6 +21,26 @@ class ExchangeTextField extends StatefulWidget {
 }
 
 class _ExchangeTextFieldState extends State<ExchangeTextField> {
+  bool _isContainerFocused = false;
+  FocusNode _textFieldFocusNode = FocusNode();
+  @override
+  void initState() {
+    _textFieldFocusNode.addListener(_onFocusChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textFieldFocusNode.removeListener(_onFocusChange);
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isContainerFocused = _textFieldFocusNode.hasFocus;
+    });
+  }
+
   String _getCurrencyUnit(String unit) {
     String result = '대한민국 원';
     switch (unit) {
@@ -47,6 +67,7 @@ class _ExchangeTextFieldState extends State<ExchangeTextField> {
           color: Colors.white,
           border: Border.all(
             width: 1.0,
+            color: _isContainerFocused ? Colors.blueAccent : Colors.grey,
           ),
           borderRadius: BorderRadius.circular(16.0),
         ),
@@ -54,6 +75,7 @@ class _ExchangeTextFieldState extends State<ExchangeTextField> {
           children: [
             Flexible(
               child: TextField(
+                focusNode: _textFieldFocusNode,
                 keyboardType: TextInputType.number,
                 controller: widget.controller,
                 onChanged: (value) {
@@ -67,7 +89,7 @@ class _ExchangeTextFieldState extends State<ExchangeTextField> {
                 decoration: const InputDecoration(border: InputBorder.none),
               ),
             ),
-            DropdownButton(
+            DropdownButton<String>(
                 dropdownColor: Colors.white,
                 elevation: 0,
                 value: widget.dropdownValue,
