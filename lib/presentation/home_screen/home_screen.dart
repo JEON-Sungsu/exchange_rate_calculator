@@ -13,10 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String baseCurrency = 'krw';
   String resultCurrency = 'usd';
-  TextEditingController _baseController = TextEditingController();
-  TextEditingController _resultController = TextEditingController();
-  String converted = '';
-  final _textNotifier = ValueNotifier<String>('');
+  num inputMoney = 0;
 
   @override
   void initState() {
@@ -29,8 +26,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _baseController.dispose();
-    _resultController.dispose();
+    Future.microtask(() {
+      final viewModel = context.read<HomeViewModel>();
+      viewModel.baseController.dispose();
+      viewModel.resultController.dispose();
+    });
     super.dispose();
   }
 
@@ -39,35 +39,46 @@ class _HomeScreenState extends State<HomeScreen> {
     final viewModel = context.watch<HomeViewModel>();
     return Scaffold(
       appBar: AppBar(
-        title: Text('환율 계산기'),
+        title: const Text('환율 계산기'),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text('환율 정보 갱신 시간 ${viewModel.exchangeRateModel.lastUpdated}'),
+          ),
           ExchangeTextField(
-            controller: _baseController,
+            controller: viewModel.baseController,
             dropdownValue: baseCurrency,
             dropdownMenu: viewModel.dropdownMenu,
             onChanged: (String? value) {
-              baseCurrency = value ?? '';
+              viewModel.baseController.text = '';
+              viewModel.resultController.text = '';
+              setState(() {
+                baseCurrency = value ?? 'krw';
+              });
             },
             onTyping: (String money) {
-              final numMoney = num.parse(money);
-              viewModel.onSearch(baseCurrency, resultCurrency, numMoney, null);
-              setState(() {
-                _resultController.text = viewModel.convertedMoney;
-              });
+              inputMoney = num.parse(money);
+              viewModel.onSearch(baseCurrency, resultCurrency, inputMoney, null);
             },
           ),
           ExchangeTextField(
-            controller: _resultController,
+            controller: viewModel.resultController,
             dropdownValue: resultCurrency,
             dropdownMenu: viewModel.dropdownMenu,
             onChanged: (String? value) {
+              viewModel.baseController.text = '';
+              viewModel.resultController.text = '';
               setState(() {
-                resultCurrency = value ?? '';
+                resultCurrency = value ?? 'usd';
               });
             },
-            onTyping: (String money) {},
+            onTyping: (String money) {
+              inputMoney = num.parse(money);
+              viewModel.onSearch(resultCurrency, baseCurrency, null, inputMoney);
+            },
           ),
         ],
       ),

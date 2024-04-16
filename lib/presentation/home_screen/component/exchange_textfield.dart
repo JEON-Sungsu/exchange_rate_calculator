@@ -54,15 +54,22 @@ class _ExchangeTextFieldState extends State<ExchangeTextField> {
           children: [
             Flexible(
               child: TextField(
+                keyboardType: TextInputType.number,
                 controller: widget.controller,
                 onChanged: (value) {
-                  widget.onTyping(value);
+                  if (value.isEmpty) {
+                    widget.onTyping('-1');
+                  } else {
+                    widget.onTyping(value);
+                  }
                 },
                 enabled: true,
-                decoration: InputDecoration(border: InputBorder.none),
+                decoration: const InputDecoration(border: InputBorder.none),
               ),
             ),
             DropdownButton(
+                dropdownColor: Colors.white,
+                elevation: 0,
                 value: widget.dropdownValue,
                 icon: const Icon(Icons.arrow_drop_down_sharp),
                 style: const TextStyle(color: Colors.black87),

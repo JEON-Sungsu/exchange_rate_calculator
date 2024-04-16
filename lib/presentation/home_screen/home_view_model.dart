@@ -1,25 +1,18 @@
-import 'dart:async';
-
 import 'package:exchange_rate_calculator/data/data_source/exchange_rate_api.dart';
 import 'package:exchange_rate_calculator/data/model/conversion_rates_model.dart';
 import 'package:exchange_rate_calculator/data/model/exchange_rate_model.dart';
 import 'package:exchange_rate_calculator/data/repository/exchange_repository.dart';
 import 'package:exchange_rate_calculator/data/repository/exchange_repository_impl.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class HomeViewModel with ChangeNotifier {
   final ExchangeRepository _exchangeRepository =
       ExchangeRepositoryImpl(api: ExchangeRateApi());
 
   final List<String> _dropdownMenu = [];
-
-  List<String> get dropdownMenu => List.unmodifiable(_dropdownMenu);
-
   String _convertedMoney = '';
-
-  String get convertedMoney => _convertedMoney;
-
-  ExchangeRateModel _state = const ExchangeRateModel(
+  ExchangeRateModel _exchangeRateModel = const ExchangeRateModel(
       lastUpdated: '',
       conversionRates: ConversionRatesModel(
         usd: 0,
@@ -28,32 +21,38 @@ class HomeViewModel with ChangeNotifier {
         jpy: 0,
         cny: 0,
       ));
+  final TextEditingController _baseController = TextEditingController();
+  final TextEditingController _resultController = TextEditingController();
 
-  ExchangeRateModel get state => _state;
+  ExchangeRateModel get exchangeRateModel => _exchangeRateModel;
+  List<String> get dropdownMenu => List.unmodifiable(_dropdownMenu);
+  String get convertedMoney => _convertedMoney;
+  TextEditingController get baseController => _baseController;
+  TextEditingController get resultController => _resultController;
 
-  Timer? _timer;
-
-  void onSearch(String base, String conversion, num baseMoney,
+  void onSearch(String base, String conversion, num? baseMoney,
       num? conversionMoney) async {
-    _timer?.cancel();
+    _exchangeRateModel = await _exchangeRepository.getExchangeRate(base);
+    num conversionValue = _exchangeRateModel.conversionRates.toJson()[conversion];
 
-    _timer = Timer(const Duration(milliseconds: 500), () async {
-      _state = await _exchangeRepository.getExchangeRate(base);
-      num? baseValue;
-      num? conversionValue;
-      _state.conversionRates.toJson().forEach((key, value) {
-        if (key == base) {
-          baseValue = value;
-        }
-        if (key == conversion) {
-          conversionValue = value;
-        }
-      });
+    if (baseMoney != null) {
+      _convertedMoney = (conversionValue * baseMoney).toString();
+      if (baseMoney == -1) {
+        resultController.text = '';
+      } else {
+        resultController.text = _convertedMoney;
+      }
+    }
 
-      _convertedMoney = (conversionValue! * baseMoney).toString();
-
-      notifyListeners();
-    });
+    if (conversionMoney != null) {
+      _convertedMoney = (conversionValue * conversionMoney).toString();
+      if (conversionMoney == -1) {
+        baseController.text = '';
+      } else {
+        baseController.text = _convertedMoney;
+      }
+    }
+    notifyListeners();
   }
 
   void fetchData() async {
