@@ -12,6 +12,7 @@ class ExchangeRateApi {
   }) : _client = client ?? https.Client();
 
   Future<ExchangeRateDto> getExchangeRateDto(String query) async {
+    await dotenv.load(fileName: '.env');
     final apiKey = dotenv.get('API_KEY');
     final response = await _client
         .get(Uri.parse('$baseUrl/$apiKey/latest/${query.toUpperCase()}'));
@@ -21,10 +22,4 @@ class ExchangeRateApi {
     }
     return ExchangeRateDto.fromJson(jsonDecode(response.body));
   }
-}
-
-void main() async {
-  ExchangeRateApi exchangeRateApi = ExchangeRateApi();
-  final test = await exchangeRateApi.getExchangeRateDto('usd');
-  print(test.toString());
 }

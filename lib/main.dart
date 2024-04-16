@@ -1,6 +1,9 @@
 import 'package:exchange_rate_calculator/presentation/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
+import 'presentation/home_screen/home_view_model.dart';
 
 void main() async {
   await dotenv.load(fileName: '.env');
@@ -18,7 +21,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: ChangeNotifierProvider(
+          create: (_) {
+            return HomeViewModel();
+          },
+          child: const HomeScreen()),
     );
   }
 }
