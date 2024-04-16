@@ -2,7 +2,7 @@ import 'package:exchange_rate_calculator/data/data_source/exchange_rate_api.dart
 import 'package:exchange_rate_calculator/data/dto/exchange_rate_dto.dart';
 import 'package:exchange_rate_calculator/data/dto/exchange_rate_mapper.dart';
 import 'package:exchange_rate_calculator/data/model/exchange_rate_model.dart';
-import 'package:exchange_rate_calculator/data/repository/excahnge_repository.dart';
+import 'package:exchange_rate_calculator/data/repository/exchange_repository.dart';
 
 class ExchangeRepositoryImpl implements ExchangeRepository {
   final ExchangeRateApi _api;
